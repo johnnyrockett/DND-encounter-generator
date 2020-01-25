@@ -99,18 +99,34 @@ class Monster:
             setattr(self, "_" + name, val)
 
     def damage(self, amount):
-        self._current_health = max(self._current_health - amount, 0)
+        self._current_health = min(max(self._current_health - amount, 0), self._max_health)
 
+
+    NAME_LENGTH = 10
+    STATS_LENGTH = 20
+    HEALTH_LENGTH = 7
     def __str__(self):
-        s = "{bold}{name}{endc} {size}(lv{lvl}-cr{cr}): {current_health}/{max_health}".format(
-            bold=bcolors.BOLD,
-            name=self._name,
-            endc=bcolors.ENDC,
+
+        stats = "{size}(lv{lvl}-cr{cr}):".format(
             size=self._size.name,
             lvl=self._level,
             cr=self._cr,
+        )
+        stats = stats[:self.STATS_LENGTH-3] + '...' if len(stats) > self.STATS_LENGTH else stats + ' ' * (self.STATS_LENGTH - len(stats))
+
+        health_check = "{current_health}/{max_health}".format(
             current_health=self._current_health,
-            max_health=self._max_health)
+            max_health=self._max_health
+        )
+
+        health_check = health_check[:self.HEALTH_LENGTH-3] + '...' if len(health_check) > self.HEALTH_LENGTH else health_check + ' ' * (self.HEALTH_LENGTH - len(health_check))
+
+        s = "{bold}{name}{endc} {stats} {health} ".format(
+            bold=bcolors.BOLD,
+            name= self._name[:self.NAME_LENGTH-3] + '...' if len(self._name) > self.NAME_LENGTH else self._name + ' ' * (self.NAME_LENGTH - len(self._name)),
+            endc=bcolors.ENDC,
+            stats=stats,
+            health=health_check)
         if self._current_health > 0:
             p = self._current_health/self._max_health
             s += " [{filled}{empty}]".format(
@@ -193,9 +209,13 @@ class Encounter:
         self.calcMonsterXP()
         self.calcDifficulty()
 
-    def removeMonster(self, i):
-        self._monsters.remove(i)
+    def removeMonster(self, name):
+        for mon in self._monsters:
+            if mon._name == name:
+                self._monsters.remove(mon)
+                break
         self.calcMonsterXP()
+        self.calcDifficulty()
 
     def getMonster(self, name):
         for mon in self._monsters:

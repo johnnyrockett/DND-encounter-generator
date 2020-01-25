@@ -19,7 +19,7 @@ def subject_completer(prefix, parsed_args, **kwargs):
         return [mon._name for mon in state._monsters]
 
 cmdParser = argparse.ArgumentParser(prog='PROG', description='DND encounter interface')
-cmdParser.add_argument('cmd', choices=['new','damage','check','remove', 'help', 'quit'])
+cmdParser.add_argument('cmd', choices=['new','damage','heal','check','remove', 'help', 'quit'])
 cmdParser.add_argument('subargs', nargs='*').completer = subject_completer
 
 completer = argcomplete.CompletionFinder(cmdParser)
@@ -40,22 +40,26 @@ while True:
         # trap argparse error message
         print('error')
         continue
-    if args.cmd == 'new':
+    if args.cmd == 'new' and len(args.subargs) >= 1:
         if args.subargs[0] == 'encounter':
             state = Encounter()
         elif args.subargs[0] == 'monster':
             if not state:
                 state = Encounter(populate=False)
             state.addMonster(Monster(player_level))
-    elif args.cmd == 'damage':
-        if state:
-            mon = state.getMonster(args.subargs[0])
-            if mon and args.subargs[1].isdigit():
-                mon.damage(int(args.subargs[1]))
+    elif args.cmd == 'damage' and state and len(args.subargs) == 2:
+        mon = state.getMonster(args.subargs[0])
+        if mon and args.subargs[1].isdigit():
+            mon.damage(int(args.subargs[1]))
+    elif args.cmd == 'heal' and state and len(args.subargs) == 2:
+        mon = state.getMonster(args.subargs[0])
+        if mon and args.subargs[1].isdigit():
+            mon.damage(-1*int(args.subargs[1]))
+    elif args.cmd == 'remove' and state and len(args.subargs) == 1:
+        state.removeMonster(args.subargs[0])
     elif args.cmd == 'help':
         cmdParser.print_help()
     elif args.cmd == 'quit':
         exit(0)
     else:
-        print('done')
-        break
+        cmdParser.error("I didn't understand that")
