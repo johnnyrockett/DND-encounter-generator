@@ -54,6 +54,8 @@ class Monster:
         # Monster's name
         if name is None:
             self._name = names[random.randint(0, len(names))][:-1]
+        else:
+            self._name = name
 
         # Monster's level
         if level is None:
@@ -62,11 +64,11 @@ class Monster:
             self._level = level
 
         # Monster's size (effects hp)
-        if size is None:
+        if size is None or size not in [ monSize.name for monSize in self.MonsterSize]:
             rVal = round(random.normal(2, 0.75, 1)[0])
             self._size = self.MonsterSize(max(0, min(5, rVal)))
         else:
-            self._size = size
+            self._size = getattr(self.MonsterSize, size)
             # distribution = {}
             # for size in rSize:
             #     result = Monster.MonsterSize(max(0, min(5, round(size))))
@@ -167,7 +169,7 @@ class Encounter:
             self.populate(difficulty)
 
     def populate(self, difficulty=None):
-        if difficulty is not None and isinstance(difficulty, str) and difficulty in self.EncounterDifficulty:
+        if difficulty is not None and isinstance(difficulty, str) and difficulty in [diff.name for diff in self.EncounterDifficulty]:
             self._difficulty = getattr(self.EncounterDifficulty, difficulty)
         else:
             difficulty = round(random.gamma(1.9, 0.6))

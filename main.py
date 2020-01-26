@@ -1,4 +1,5 @@
 import argcomplete, argparse, readline
+import random
 
 from monster_maker import Encounter, Monster, player_level, players
 
@@ -16,11 +17,25 @@ def subject_completer(prefix, parsed_args, **kwargs):
     if parsed_args.cmd == 'new':
         return ['encounter', 'monster']
     elif parsed_args.cmd not in ['help', 'quit'] and state:
-        return [mon._name for mon in state._monsters]
+        if len(parsed_args.subargs) == 0:
+            return [mon._name for mon in state._monsters]
+        elif parsed_args.cmd == 'check':
+            return ['attack', 'hit', 'ac', 'dc']
+
+def size_completer(prefix, parsed_args, **kwargs):
+    return [size.name for size in Monster.MonsterSize]
+
+def difficulty_completer(prefix, parsed_args, **kwargs):
+    return [diff.name for diff in Encounter.EncounterDifficulty]
 
 cmdParser = argparse.ArgumentParser(prog='PROG', description='DND encounter interface')
 cmdParser.add_argument('cmd', choices=['new','damage','heal','check','remove', 'help', 'quit'])
 cmdParser.add_argument('subargs', nargs='*').completer = subject_completer
+cmdParser.add_argument('-n', '--name', required=False)
+cmdParser.add_argument('-l', '--level', type=int, required=False)
+cmdParser.add_argument('-s', '--size', required=False).completer = size_completer
+cmdParser.add_argument('-hp', '--health', type=int, required=False)
+cmdParser.add_argument('-d', '--difficulty', required=False).completer = difficulty_completer
 
 completer = argcomplete.CompletionFinder(cmdParser)
 readline.set_completer_delims("")
@@ -42,11 +57,12 @@ while True:
         continue
     if args.cmd == 'new' and len(args.subargs) >= 1:
         if args.subargs[0] == 'encounter':
-            state = Encounter()
+            state = Encounter(difficulty=args.difficulty)
         elif args.subargs[0] == 'monster':
             if not state:
                 state = Encounter(populate=False)
-            state.addMonster(Monster(player_level))
+            print(args)
+            state.addMonster(Monster(name=args.name, size=args.size, health=args.health, level=args.level if args.level else player_level))
     elif args.cmd == 'damage' and state and len(args.subargs) == 2:
         mon = state.getMonster(args.subargs[0])
         if mon and args.subargs[1].isdigit():
@@ -57,6 +73,16 @@ while True:
             mon.damage(-1*int(args.subargs[1]))
     elif args.cmd == 'remove' and state and len(args.subargs) == 1:
         state.removeMonster(args.subargs[0])
+    elif args.cmd == 'check' and state and len(args.subargs) == 2:
+        mon = state.getMonster(args.subargs[0])
+        if mon:
+            if args.subargs[1] == 'attack' or args.subargs[1] == 'hit':
+                print(mon._name + ' rolls {roll} to hit'.format(roll=random.randint(1, 20) + mon._attkBonus))
+            elif args.subargs[1] == 'ac':
+                print(mon._name + ' has an armor class of ' + str(mon._ac))
+            elif args.subargs[1] == 'dc':
+                print(mon._name + ' has a save DC of ' + str(mon._saveDC))
+
     elif args.cmd == 'help':
         cmdParser.print_help()
     elif args.cmd == 'quit':
