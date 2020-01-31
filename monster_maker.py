@@ -1,10 +1,8 @@
 from numpy import random
-
-from enum import Enum
 from tables import *
 
 players = 5
-player_level = 3
+player_level = 20
 
 f = open('names.txt', 'r')
 names = f.readlines()
@@ -49,6 +47,17 @@ class Monster:
 
     hitDieMap = { MonsterSize.Tiny: 4, MonsterSize.Small: 6, MonsterSize.Medium: 8, MonsterSize.Large: 10, MonsterSize.Huge: 12, MonsterSize.Gargantuan: 20 }
 
+    def extractScore(self, score):
+        dif = score - 10
+        negative = dif < 0
+        dif = abs(dif)
+        dif = int(dif / 2)
+        return dif * -1 if negative else dif
+
+    def checkAbility(self, ability):
+        score = getattr(self, '_' + ability, 0)
+        return random.randint(1, 21) + self.extractScore(score)
+
     def __init__(self, level=None, size=None, health=None, name=None):
 
         # Monster's name
@@ -59,7 +68,7 @@ class Monster:
 
         # Monster's level
         if level is None:
-            self._level = random.randint(1, 20)
+            self._level = random.randint(1, 21)
         else:
             self._level = level
 
@@ -79,6 +88,25 @@ class Monster:
 
             # for key, val in distribution.items():
             #     print(key.name + ": " + str(val))
+        total_dice_pool = []
+        for i in range(6):
+            dice_pool = []
+            for i in range(4):
+                dice_pool.append(random.randint(1, 7))
+            dice_pool.remove(min(dice_pool))
+            total_dice_pool.append(sum(dice_pool))
+        self._strength = total_dice_pool[0]
+        self._dexterity = total_dice_pool[1]
+        self._intelligence = total_dice_pool[2]
+        self._wisdom = total_dice_pool[3]
+        self._charisma = total_dice_pool[4]
+        self._constitution = total_dice_pool[5]
+
+        for i in range(round(level/4)):
+            ability = '_' + random.choice(abilityNames)
+            setattr(self, ability, getattr(self, ability)+1)
+            ability = '_' + random.choice(abilityNames)
+            setattr(self, ability, getattr(self, ability)+1)
 
         # Monster's health
         if health is None:

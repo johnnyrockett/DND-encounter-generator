@@ -1,5 +1,7 @@
 import math
 
+from enum import Enum
+
 stats_by_cr = {
     0:     { "xp": 10, "prof": 2, "ac": 13, "attkBonus": 3, "dpr": range(0, 1), "saveDC": 13},
     0.125:   { "xp": 25, "prof": 2, "ac": 13, "attkBonus": 3, "dpr": range(2, 3), "saveDC": 13},
@@ -99,4 +101,44 @@ healthBrackets = {
     760: 28,
     805: 29,
     850: 30
+}
+
+class Ability(Enum):
+    Strength = 0
+    Str = 0
+    Dexterity = 1
+    Dex = 1
+    Intelligence = 2
+    Int = 2
+    Wisdom = 3
+    Wis = 3
+    Charisma = 4
+    Cha = 4
+
+abilityNames = ['strength', 'dexterity', 'intelligence', 'wisdom', 'charisma', 'constitution']
+
+skills =  {
+    # Str
+    "athletics": Ability.Str.value,
+    # Dex
+    "acrobatics": Ability.Dex.value,
+    "sleight of hand": Ability.Dex.value,
+    "stealth": Ability.Dex.value,
+    # Int
+    "arcana": Ability.Int.value,
+    "history": Ability.Int.value,
+    "investigation": Ability.Int.value,
+    "nature": Ability.Int.value,
+    "religion": Ability.Int.value,
+    #Wis
+    "animal handling": Ability.Wis.value,
+    "insight": Ability.Wis.value,
+    "medicine": Ability.Wis.value,
+    "perception": Ability.Wis.value,
+    "survival": Ability.Wis.value,
+    # Cha
+    "deception": Ability.Cha.value,
+    "intimidation": Ability.Cha.value,
+    "performance": Ability.Cha.value,
+    "persuasion": Ability.Cha.value,
 }
