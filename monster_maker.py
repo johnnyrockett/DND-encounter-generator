@@ -1,8 +1,8 @@
 from numpy import random
 from tables import *
 
-players = 5
-player_level = 20
+players = 6
+player_level = 2
 
 f = open('names.txt', 'r')
 names = f.readlines()
