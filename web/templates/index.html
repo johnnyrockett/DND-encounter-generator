@@ -5,12 +5,19 @@
 <link rel="stylesheet" type="text/css" media="all" href="css/reset.css" /> <!-- reset css -->
 <script type="text/javascript" src="http://code.jquery.com/jquery.min.js"></script>
 <!-- Bootstrap CSS -->
-<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-<!-- <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous"> -->
+<!-- <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous"> -->
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+<link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
 
 <style>
     body{ background-color: ivory; }
     #canvas{border:1px solid red;}
+    div.sticky {
+      position: -webkit-sticky;
+      position: sticky;
+      top: 0;
+      padding: 30px;
+    }
 </style>
 
 <script>
@@ -209,17 +216,27 @@ window.onload=function(){
 </script>
 </head>
 <body>
-  <div class="btn-group-vertical">
-    <button type="button" class="btn btn-danger">Damage</button>
-    <button type="button" class="btn btn-success">Heal</button>
-    <button type="button" class="btn btn-warning">Check Stats</button>
-    <button type="button" class="btn btn-info">Start Monster Turn</button>
+  <div class="row">
+    <div class="col">
+      <canvas id="canvas" width=900 height=600></canvas>
+      <script src='/js/canvas.js'></script>
+      <div align="center">
+        <a href="#" class="btn btn-primary"><span class="fa fa-user"></span> Add Player </a>
+        <a href="#" class="btn btn-secondary"><span class="fa fa-flash"></span> Add Monster </a>
+        <a href="#" class="btn btn-warning"><span class="fa fa-fire"></span> Add Obstacle </a>
+        <a href="#" class="btn btn-danger"><span class="fa fa-remove"></span> Remove </a>
+    </div>
+    </div>
+    <div class="col">
+      <div class="sticky">
+        <div class="btn-group-vertical">
+          <button type="button" class="btn btn-danger">Damage</button>
+          <button type="button" class="btn btn-success">Heal</button>
+          <button type="button" class="btn btn-warning">Check Stats</button>
+          <button type="button" class="btn btn-info">Start Monster Turn</button>
+        </div>
+      </div>
+    </div>
   </div>
-  <a href="#" class="btn btn-primary"><span class="glyphicon glyphicon-user"></span> Add Player </a>
-  <a href="#" class="btn btn-primary"><span class="glyphicon glyphicon-flash"></span> Add Monster </a>
-  <a href="#" class="btn btn-primary"><span class="glyphicon glyphicon-fire"></span> Add Obstacle </a>
-  <a href="#" class="btn btn-primary"><span class="glyphicon glyphicon-remove"></span> Remove </a>
-  <canvas id="canvas" width=900 height=600></canvas>
 </body>
-<script src='/js/canvas.js'></script>
 </html>
