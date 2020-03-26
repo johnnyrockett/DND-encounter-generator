@@ -25,4 +25,28 @@ def main():
 def grid():
     return json.dumps(state)
 
+@app.route('/create')
+def create():
+    pass
+
+@app.route('/remove')
+def remove():
+    pass
+
+@app.route('/damage/<sourceid>/<destid>/<amt>')
+def damage(src, dest, amt):
+    pass
+
+@app.route('/heal/<eid>/<amt>')
+def heal(eid, amt):
+    pass
+
+@app.route('/check/<eid>/<stat>')
+def check(eid, stat):
+    pass
+
+@app.route('/update/pos/<eid>/<col>/<row>')
+def updatePos(eid, col, row):
+    pass
+
 app.run()
