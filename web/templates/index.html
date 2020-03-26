@@ -28,19 +28,30 @@ window.onload=function(){
     var startY;
 
     // an array of objects that define different rectangles
-    var rects=[];
-    rects.push({x:75-15,y:50-15,width:TOKEN_SIZE,height:TOKEN_SIZE,fill:"#444444",isDragging:false});
-    rects.push({x:75-25,y:50-25,width:TOKEN_SIZE,height:TOKEN_SIZE,fill:"#ff550d",isDragging:false});
-    rects.push({x:75-35,y:50-35,width:TOKEN_SIZE,height:TOKEN_SIZE,fill:"#800080",isDragging:false});
-    rects.push({x:75-45,y:50-45,width:TOKEN_SIZE,height:TOKEN_SIZE,fill:"#0c64e8",isDragging:false});
+    var rects=null;
 
     // listen for mouse events
     canvas.onmousedown = myDown;
     canvas.onmouseup = myUp;
     canvas.onmousemove = myMove;
 
-    // call to draw the scene
-    draw();
+    function pullGrid() {
+        $.ajax({
+            url: "/grid",
+            type: "GET",
+            contentType: "application/json"}).done(function(data) {
+                rects = data["entities"]
+                for (var i=0;i<rects.length;i++) {
+                    rects[i].x = rects[i].col * TOKEN_SIZE;
+                    rects[i].y = rects[i].row * TOKEN_SIZE;
+                    rects[i].isDragging = false;
+                }
+                // call to draw the scene
+                draw();
+        });
+    }
+
+    pullGrid();
 
     // draw a single rect
     function rect(x,y,w,h) {
@@ -83,7 +94,7 @@ window.onload=function(){
         for(var i=0;i<rects.length;i++){
             var r=rects[i];
             ctx.fillStyle=r.fill;
-            rect(r.x,r.y,r.width,r.height);
+            rect(r.x,r.y,r.size*TOKEN_SIZE,r.size*TOKEN_SIZE);
         }
     }
 
@@ -103,7 +114,7 @@ window.onload=function(){
         dragok=false;
         for(var i=0;i<rects.length;i++){
             var r=rects[i];
-            if(mx>r.x && mx<r.x+r.width && my>r.y && my<r.y+r.height){
+            if(mx>r.x && mx<r.x+r.size*TOKEN_SIZE && my>r.y && my<r.y+r.size*TOKEN_SIZE){
                 // if yes, set that rects isDragging=true
                 dragok=true;
                 r.isDragging=true;
@@ -118,9 +129,9 @@ window.onload=function(){
         var div = p / TOKEN_SIZE;
         var offset = div % 1;
         if (offset < 0.5) {
-            return TOKEN_SIZE * Math.floor(div);
+            return Math.floor(div);
         } else {
-            return TOKEN_SIZE * Math.ceil(div);
+            return Math.ceil(div);
         }
     }
 
@@ -133,15 +144,20 @@ window.onload=function(){
 
         // clear all the dragging flags
         dragok = false;
+        changeMade = false;
         for(var i=0;i<rects.length;i++){
             if (rects[i].isDragging) {
                 var r=rects[i];
-                r.x = snapToGrid(r.x);
-                r.y = snapToGrid(r.y);
+                r.col = snapToGrid(r.x);
+                r.x = TOKEN_SIZE * r.col;
+                r.row = snapToGrid(r.y);
+                r.y = TOKEN_SIZE * r.row;
+                changeMade = true;
             }
             rects[i].isDragging=false;
         }
-        draw();
+        if (changeMade)
+            draw();
     }
 
 
