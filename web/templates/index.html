@@ -44,7 +44,8 @@ window.onload=function(){
             url: "/grid",
             type: "GET",
             contentType: "application/json"}).done(function(data) {
-                rects = data["entities"]
+                var parsed = JSON.parse(data);
+                rects = parsed["entities"]
                 for (var i=0;i<rects.length;i++) {
                     rects[i].x = rects[i].col * TOKEN_SIZE;
                     rects[i].y = rects[i].row * TOKEN_SIZE;

@@ -23,6 +23,6 @@ def main():
 
 @app.route('/grid')
 def grid():
-    return state
+    return json.dumps(state)
 
 app.run()
