@@ -77,19 +77,19 @@ class CLI:
                 # "stats" print out all stored stats for mon
                 if args.subargs[1] == 'attack' or args.subargs[1] == 'hit':
                     roll = random.randint(1, 20)
-                    print(mon._name + ' rolls {crit}{roll} to hit'.format(roll=roll + mon._attkBonus, crit='a NATURAL 20 for ' if roll == 20 else ''))
+                    return mon._name + ' rolls {crit}{roll} to hit'.format(roll=roll + mon._attkBonus, crit='a NATURAL 20 for ' if roll == 20 else '')
                 elif args.subargs[1] == 'ac':
-                    print(mon._name + ' has an armor class of ' + str(mon._ac))
+                    return mon._name + ' has an armor class of ' + str(mon._ac)
                 elif args.subargs[1] == 'dc':
-                    print(mon._name + ' has a save DC of ' + str(mon._saveDC))
+                    return mon._name + ' has a save DC of ' + str(mon._saveDC)
                 elif args.subargs[1] == 'stats':
                     pp = pprint.PrettyPrinter(indent=4)
                     pp.pprint(mon.__dict__)
                 elif args.subargs[1] == 'damage':
-                    print(mon._name + ' deals {damage} damage'.format(damage=random.randint(mon._dpr[0], mon._dpr[1])))
+                    return mon._name + ' deals {damage} damage'.format(damage=random.randint(mon._dpr[0], mon._dpr[1]))
                 elif args.subargs[1] in skills:
                     a = Ability(skills[args.subargs[1]])
-                    print(mon._name + ' rolled a ' + str(mon.checkAbility(str.lower(a.name))))
+                    return mon._name + ' rolled a ' + str(mon.checkAbility(str.lower(a.name)))
 
         elif args.cmd == 'help':
             cmdParser.print_help()

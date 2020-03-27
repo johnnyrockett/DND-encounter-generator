@@ -9,6 +9,8 @@ from flask import Flask, send_file, render_template
 
 app = Flask(__name__, template_folder=os.path.join('web', 'templates'))
 
+dnd_backend = CLI()
+
 with open('map1.json') as f:
     state = json.load(f)
 
@@ -17,6 +19,7 @@ for entity in state['entities']:
     eid = uuid.uuid1().hex
     entity['eid'] = eid
     entities[eid] = entity
+    dnd_backend.query('new monster --name {name}'.format(name=eid))
 
 
 @app.route('/')
@@ -45,16 +48,23 @@ def remove(eid):
     return ':)'
 
 @app.route('/damage/<sourceid>/<destid>/<amt>')
-def damage(src, dest, amt):
-    pass
+def damage(srcid, destid, amt):
+    rc = dnd_backend.query('damage {destid} {amt}'.format(destid=destid, amt=amt))
+    if 'threat' not in entities[destid]:
+        entities[destid]['threat'] = {}
+    if srcid not in entities[destid]['threat']:
+        entities[destid]['threat'][srcid] = 0
+    entities[destid]['threat'][srcid] += amt
+    return rc
 
 @app.route('/heal/<eid>/<amt>')
 def heal(eid, amt):
-    pass
+    return dnd_backend.query('heal {eid} {amt}'.format(eid=eid, amt=amt))
 
 @app.route('/check/<eid>/<stat>')
 def check(eid, stat):
-    pass
+    return dnd_backend.query('check {eid} {stat}'.format(eid=eid, stat=stat))
+
 
 @app.route('/update/pos/<eid>/<col>/<row>')
 def updatePos(eid, col, row):
