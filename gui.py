@@ -28,24 +28,29 @@ def main():
 
 @app.route('/grid')
 def grid():
-    return json.dumps(state)
+    return json.dumps(list(entities.values()))
 
-@app.route('/create/<type>/<col>/<row>')
+@app.route('/create/<etype>/<col>/<row>')
 def create(etype, col, row):
     eid = uuid.uuid1().hex
-    entity = {"col":col,"row":row,"size":1,"fill":"#444444", "type": etype}
+    entity = {"col":col,"row":row,"size":1,"fill":"#444444", "type": etype, "eid": eid}
     entities[eid] = entity
-    stat['entities'].append(entity)
-    return ':)'
+    rc = dnd_backend.query('new monster --name ' + eid)
+    if rc == -1:
+        return 'Something went wrong', 500
+    else:
+        return eid
 
 @app.route('/remove/<eid>')
 def remove(eid):
     if eid not in entities:
-        return ':('
-    entity = entities[eid]
-    state['entities'].remove(entity)
+        return "That entity id doesn't exist", 404
     del entities[eid]
-    return ':)'
+    rc = dnd_backend.query('remove ' + eid)
+    if rc == -1:
+        return "Something went wrong", 500
+    else:
+        return "Success"
 
 @app.route('/damage/<sourceid>/<destid>/<amt>')
 def damage(srcid, destid, amt):
@@ -55,7 +60,10 @@ def damage(srcid, destid, amt):
     if srcid not in entities[destid]['threat']:
         entities[destid]['threat'][srcid] = 0
     entities[destid]['threat'][srcid] += amt
-    return rc
+    if rc == -1:
+        return 'Something went wrong', 500
+    else:
+        return "Success"
 
 @app.route('/heal/<eid>/<amt>')
 def heal(eid, amt):
