@@ -164,6 +164,10 @@ window.onload=function(){
                 r.x = TOKEN_SIZE * r.col;
                 r.row = snapToGrid(r.y);
                 r.y = TOKEN_SIZE * r.row;
+
+                $.ajax({
+                    url: "/update/pos/" + [r.eid, r.col, r.row].join('/'),
+                    type: "GET"});
                 changeMade = true;
             }
             rects[i].isDragging=false;

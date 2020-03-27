@@ -1,0 +1,8 @@
+{
+    "entities": [
+        {"col":3,"row":3,"size":1,"fill":"#444444", "type": "player"},
+        {"col":5,"row":3,"size":1,"fill":"#ff550d", "type": "player"},
+        {"col":3,"row":5,"size":1,"fill":"#800080", "type": "player"},
+        {"col":5,"row":5,"size":2,"fill":"#0c64e8", "type": "monster"}
+    ]
+}
