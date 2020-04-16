@@ -3,13 +3,16 @@ import json
 import uuid
 
 from cli import CLI
+from pathfinding import PathFinder
 
 from flask import Flask, send_file, render_template
+
 
 
 app = Flask(__name__, template_folder=os.path.join('web', 'templates'))
 
 dnd_backend = CLI()
+pathFinder = PathFinder()
 
 with open('map1.json') as f:
     state = json.load(f)
@@ -19,8 +22,12 @@ for entity in state['entities']:
     eid = uuid.uuid1().hex
     entity['eid'] = eid
     entities[eid] = entity
+    # Deal with entities with different sizes
+    pathFinder.addEntityToG(entity)
+
     dnd_backend.query('new monster --name {name}'.format(name=eid))
 
+print(pathFinder.navigate(state['entities'][0], state['entities'][2]))
 
 @app.route('/')
 def main():
@@ -35,6 +42,7 @@ def create(etype, col, row):
     eid = uuid.uuid1().hex
     entity = {"col":col,"row":row,"size":1,"fill":"#444444", "type": etype, "eid": eid}
     entities[eid] = entity
+    pathFinder.addEntityToG(entity)
     rc = dnd_backend.query('new monster --name ' + eid)
     if rc == -1:
         return 'Something went wrong', 500
@@ -73,14 +81,15 @@ def heal(eid, amt):
 def check(eid, stat):
     return dnd_backend.query('check {eid} {stat}'.format(eid=eid, stat=stat))
 
-
 @app.route('/update/pos/<eid>/<col>/<row>')
 def updatePos(eid, col, row):
     if eid not in entities:
         return ':('
     entity = entities[eid]
+    pathFinder.removeEntityFromG(entity)
     entity['col'] = int(col)
     entity['row'] = int(row)
+    pathFinder.addEntityToG(entity)
     return ':)'
 
 app.run()
