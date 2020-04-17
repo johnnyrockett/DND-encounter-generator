@@ -98,8 +98,9 @@ def remove(eid):
     else:
         return "Success"
 
-@app.route('/damage/<sourceid>/<destid>/<amt>')
+@app.route('/damage/<srcid>/<destid>/<amt>')
 def damage(srcid, destid, amt):
+    amt = int(amt)
     rc = dnd_backend.query('damage {destid} {amt}'.format(destid=destid, amt=amt))
     if 'threat' not in entities[destid]:
         entities[destid]['threat'] = {}
@@ -113,11 +114,11 @@ def damage(srcid, destid, amt):
 
 @app.route('/heal/<eid>/<amt>')
 def heal(eid, amt):
-    return dnd_backend.query('heal {eid} {amt}'.format(eid=eid, amt=amt))
+    return str(dnd_backend.query('heal {eid} {amt}'.format(eid=eid, amt=amt)))
 
 @app.route('/check/<eid>/<stat>')
 def check(eid, stat):
-    return dnd_backend.query('check {eid} {stat}'.format(eid=eid, stat=stat))
+    return str(dnd_backend.query('check {eid} {stat}'.format(eid=eid, stat=stat)))
 
 @app.route('/update/pos/<eid>/<col>/<row>')
 def updatePos(eid, col, row):

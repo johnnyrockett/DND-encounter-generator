@@ -35,6 +35,10 @@ var gridOn = false;
 var fakeEntity = null;
 var startX;
 var startY;
+var selectors = null;
+var selectorIndex = 0;
+var selectorFunction = null;
+var selected = [];
 
 // an array of objects that define different rectangles
 var rects=null;
@@ -52,10 +56,39 @@ function clear() {
     ctx.clearRect(0, 0, WIDTH, HEIGHT);
 }
 
+function componentToHex(c) {
+  var hex = c.toString(16);
+  return hex.length == 1 ? "0" + hex : hex;
+}
+
+function rgbToHex(c) {
+  return "#" + componentToHex(c[0]) + componentToHex(c[1]) + componentToHex(c[2]);
+}
+
+function hexToRgb(hex) {
+  var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result ? [
+    parseInt(result[1], 16),
+    parseInt(result[2], 16),
+    parseInt(result[3], 16)
+ ] : null;
+}
+
+function scaleColor(color, scaler) {
+    var c = hexToRgb(color);
+    for (var i=0; i<c.length; i++) {
+        c[i] *= scaler;
+        c[i] = Math.round(c[i]);
+    }
+    return rgbToHex(c);
+}
+
 // redraw the scene
 function draw() {
     clear();
     ctx.fillStyle = "#FAF7F8";
+    if (selectors)
+        ctx.fillStyle = scaleColor(ctx.fillStyle, 0.7);
     rect(0,0,WIDTH,HEIGHT);
 
     // draw grid
@@ -77,9 +110,13 @@ function draw() {
     }
 
     // redraw each rect in the rects[] array
+    var fill = "";
     for(var i=0;i<rects.length;i++){
         var r=rects[i];
-        ctx.fillStyle=r.fill;
+        fill = r.fill;
+        if (selectors && selectors[selectorIndex].indexOf(r.type) < 0)
+            fill = scaleColor(fill, 0.5);
+        ctx.fillStyle=fill;
         rect(r.x,r.y,r.size*TOKEN_SIZE,r.size*TOKEN_SIZE);
     }
 
@@ -109,26 +146,35 @@ function pullGrid() {
     });
 }
 
-// handle mousedown events
-function myDown(e){
+function rectHover(mx, my) {
 
-    // tell the browser we're handling this mouse event
-    e.preventDefault();
-    e.stopPropagation();
-
-    // get the current mouse position
-    var mx=parseInt(e.clientX-offsetX);
-    var my=parseInt(e.clientY-offsetY);
-
-    // test each rect to see if mouse is inside
     for(var i=0;i<rects.length;i++){
         var r=rects[i];
         if(mx>r.x && mx<r.x+r.size*TOKEN_SIZE && my>r.y && my<r.y+r.size*TOKEN_SIZE){
             // if yes, set that rects isDragging=true
-            dragok=true;
-            r.isDragging=true;
+            return r;
         }
     }
+}
+
+// handle mousedown events
+function myDown(e){
+
+    // tell the browser we're handling this mouse event
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    // get the current mouse position
+
+    var mx=parseInt(e.clientX-offsetX);
+    var my=parseInt(e.clientY-offsetY);
+
+    // test each rect to see if mouse is inside
+    var r = rectHover(mx, my);
+    dragok=true;
+    r.isDragging=true;
+
     // save the current mouse position
     startX=mx;
     startY=my;
@@ -212,6 +258,30 @@ function moveEntity(e){
     }
 }
 
+function selectEntity(e) {
+    // tell the browser we're handling this mouse event
+    e.preventDefault();
+    e.stopPropagation();
+
+    // get the current mouse position
+    var mx=parseInt(e.clientX-offsetX);
+    var my=parseInt(e.clientY-offsetY);
+
+    var r = rectHover(mx, my);
+    if (selectors[selectorIndex].indexOf(r.type) >=0) {
+        selected.push(r);
+
+        selectorIndex += 1;
+        if (selectorIndex == selectors.length) {
+            selectors = null;
+            canvas.onmousedown = myDown;
+            selectorFunction();
+            selected = [];
+        }
+    }
+    draw();
+}
+
 function placeEntity() {
     $.ajax({
         url: "/create/" + [fakeEntity.type, fakeEntity.col, fakeEntity.row].join('/'),
@@ -291,12 +361,92 @@ function giveEntityTurn(entity) {
 }
 
 function turn() {
-    console.log("running turn");
     for (var i=0;i<rects.length;i++) {
         if (rects[i]['type'] == "monster") {
             giveEntityTurn(rects[i]);
         }
     }
+}
+
+function propagateDamage() {
+    var damage = parseInt(prompt("How much damage?", "15"));
+
+    $.ajax({
+        url: "/damage/" + [selected[0].eid, selected[1].eid, damage].join('/'),
+        type: "GET"}).done(function(data) {
+            // If monster dies, remove it.
+    });
+}
+
+function propagateHeal() {
+    var heal = parseInt(prompt("How much to heal?", "15"));
+
+    $.ajax({
+        url: "/heal/" + [selected[0].eid, heal].join('/'),
+        type: "GET"});
+}
+
+function propagateStatCheck() {
+    var stat = prompt("What stat to check?", "Athletics");
+
+    (function(eid, stat) {
+        // you can use the variable "index" here instead of i
+        $.ajax({
+        url: "/check/" + [eid, stat.toLowerCase()].join('/'),
+        type: "GET"}).done(function(data) {
+            if (data == "0")
+                data = "Invalid request. Options include: [attack, ac, damage, stats, athletics, etc.]"
+            else
+                data = data.substr(data.indexOf(eid) + eid.length+1);
+            alert(data);
+        },
+        async = false);
+    })(selected[0].eid, stat);
+
+}
+
+function propagateRemove() {
+    $.ajax({
+        url: "/remove/" + selected[0].eid,
+        type: "GET"}).done(function(data) {
+            pullGrid();
+    });
+}
+
+function damage() {
+    selectors = [['player'], ['monster']];
+    selectorIndex = 0;
+    selectorFunction = propagateDamage;
+    canvas.onmousedown = selectEntity;
+
+    draw();
+}
+
+function heal() {
+    selectors = [['player', 'monster']];
+    selectorIndex = 0;
+    selectorFunction = propagateHeal;
+    canvas.onmousedown = selectEntity;
+
+    draw();
+}
+
+function checkStat() {
+    selectors = [['monster']];
+    selectorIndex = 0;
+    selectorFunction = propagateStatCheck;
+    canvas.onmousedown = selectEntity;
+
+    draw();
+}
+
+function remove() {
+    selectors = [['monster', 'player', 'obstacle']];
+    selectorIndex = 0;
+    selectorFunction = propagateRemove;
+    canvas.onmousedown = selectEntity;
+
+    draw();
 }
 
 window.onload=function(){
@@ -330,16 +480,16 @@ window.onload=function(){
         <a href="#" onclick="addEntity('player', '#00ff00')" class="btn btn-primary"><span class="fa fa-user"></span> Add Player </a>
         <a href="#" onclick="addEntity('monster', '#ff0000')" class="btn btn-secondary"><span class="fa fa-flash"></span> Add Monster </a>
         <a href="#" onclick="addEntity('obstacle', '#ff9933')" class="btn btn-warning"><span class="fa fa-fire"></span> Add Obstacle </a>
-        <a href="javascript:remove()" class="btn btn-danger"><span class="fa fa-remove"></span> Remove </a>
+        <a href="#" onclick="remove()" class="btn btn-danger"><span class="fa fa-remove"></span> Remove </a>
     </div>
     </div>
     <div class="col">
       <div class="sticky">
         <div class="btn-group-vertical">
-          <button type="button" onClick="javascript:damage()" class="btn btn-danger">Damage</button>
-          <button type="button" onClick="javascript:heal()" class="btn btn-success">Heal</button>
-          <button type="button" onClick="javascript:stats()" class="btn btn-warning">Check Stats</button>
-          <button type="button" onClick="javascript:turn()" class="btn btn-info">Start Monster Turn</button>
+          <button type="button" onClick="damage()" class="btn btn-danger">Damage</button>
+          <button type="button" onClick="heal()" class="btn btn-success">Heal</button>
+          <button type="button" onClick="checkStat()" class="btn btn-warning">Check Stats</button>
+          <button type="button" onClick="turn()" class="btn btn-info">Start Monster Turn</button>
         </div>
       </div>
     </div>

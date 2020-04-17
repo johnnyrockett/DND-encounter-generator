@@ -83,8 +83,8 @@ class CLI:
                 elif args.subargs[1] == 'dc':
                     return mon._name + ' has a save DC of ' + str(mon._saveDC)
                 elif args.subargs[1] == 'stats':
-                    pp = pprint.PrettyPrinter(indent=4)
-                    pp.pprint(mon.__dict__)
+                    # pp = pprint.PrettyPrinter(indent=4)
+                    return pprint.pformat(mon.__dict__, indent=4)
                 elif args.subargs[1] == 'damage':
                     return mon._name + ' deals {damage} damage'.format(damage=random.randint(mon._dpr[0], mon._dpr[1]))
                 elif args.subargs[1] in skills:
@@ -95,8 +95,9 @@ class CLI:
             cmdParser.print_help()
         elif args.cmd == 'quit':
             return 1
-        else:
-            cmdParser.error("I didn't understand that")
+        print("Not a valid command")
+        # else:
+        #     cmdParser.error("I didn't understand that")
         return 0
 
 if __name__ == "__main__":
