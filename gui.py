@@ -27,7 +27,7 @@ for entity in state['entities']:
 
     dnd_backend.query('new monster --name {name}'.format(name=eid))
 
-print(pathFinder.navigate(state['entities'][0], state['entities'][2]))
+# path = pathFinder.navigate(state['entities'][0], state['entities'][2])
 
 @app.route('/')
 def main():
@@ -37,10 +37,48 @@ def main():
 def grid():
     return json.dumps(list(entities.values()))
 
+@app.route('/pathfind/<eid>')
+def pathFind(eid):
+    # Perform logic to path to all players
+    # I'll need to sort a list of players by everything except for distance
+    # Well, assuming best case scenario distance
+
+    # players = []
+    # averageHealth = 0
+    # for entity in entities:
+        # if entity['type'] == "player":
+            # players.append([entity])
+            # averageHealth += val
+
+    # for player in players:
+    #     score = 0
+
+        # For all of this, I need to be able to tap into the stats of these entities
+        # Might want to consider keeping track of a list of players and monsters as well.
+
+        # Monster health
+
+        # Pathing difficulty
+
+        # Threat level
+
+        # Player health
+
+
+        # player[1] = score
+
+    print(entities[eid])
+    path = pathFinder.navigate(state['entities'][0], entities[eid])
+    if not path:
+        path = [] # Really, this should do something smart
+    else:
+        updatePos(eid, path[0][0], path[0][1])
+    return json.dumps(path)
+
 @app.route('/create/<etype>/<col>/<row>')
 def create(etype, col, row):
     eid = uuid.uuid1().hex
-    entity = {"col":col,"row":row,"size":1,"fill":"#444444", "type": etype, "eid": eid}
+    entity = {"col":int(col),"row":int(row),"size":1,"fill":"#444444", "type": etype, "eid": eid}
     entities[eid] = entity
     pathFinder.addEntityToG(entity)
     rc = dnd_backend.query('new monster --name ' + eid)

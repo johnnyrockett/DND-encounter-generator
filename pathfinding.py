@@ -17,7 +17,7 @@ class PathFinder:
 
         def __lt__(self, other):
             return self.value < other.value
-    
+
         def __eq__(self, other):
             return self.value == other.value
 
@@ -44,6 +44,10 @@ class PathFinder:
         for c in range(self.cols):
             for r in range(self.rows):
                 self.G[c][r].evaluated = False
+                self.openSet = []
+                # self.G[c][r].g = 0
+                # self.G[c][r].h = 0
+                # self.G[c][r].value = 0
 
     def addEntityToG(self, entity):
         sizeDif = entity['size']
@@ -90,15 +94,15 @@ class PathFinder:
 
     def findShortestPath(self):
         lowest = self.openSet.pop(0)
-        print("{col}, {row}".format(col=lowest.col, row=lowest.row))
-        if lowest is self.endP:
-            return self.endP
+        # print("{col}, {row}".format(col=lowest.col, row=lowest.row))
+        if lowest.eid == self.endP.eid:
+            return lowest
 
         for child in self.getChildren(lowest):
             bisect.insort(self.openSet, child)
 
     def navigate(self, toEntity, fromEntity):
-        print("Finding: {col}, {row}".format(col=toEntity['col'] ,row=toEntity['row']))
+        # print("Finding: {col}, {row}".format(col=toEntity['col'] ,row=toEntity['row']))
         self.endP = self.G[toEntity['col']][toEntity['row']]
         startNode = self.G[fromEntity['col']][fromEntity['row']]
         startNode.g = 0
@@ -107,11 +111,13 @@ class PathFinder:
         rc = None
         while len(self.openSet) != 0 and not rc:
             rc = self.findShortestPath()
-        print(self.G)
+        if rc is None:
+            self.clearGraph()
+            return None
         path = []
-        parent = rc
+        parent = self.G[rc.parent[0]][rc.parent[1]]
         while parent != startNode:
-            path.insert(0, parent)
+            path.append((parent.col, parent.row))
             parent = self.G[parent.parent[0]][parent.parent[1]]
         self.clearGraph()
         return path

@@ -2,6 +2,6 @@
     "entities": [
         {"col":4,"row":10,"size":1,"fill":"#00ff00", "type": "player"},
         {"col":11,"row":10,"size":1,"fill":"#800080", "type": "player"},
-        {"col":7,"row":3,"size":2,"fill":"#ff0000", "type": "monster"}
+        {"col":7,"row":3,"size":1,"fill":"#ff0000", "type": "monster"}
     ]
 }

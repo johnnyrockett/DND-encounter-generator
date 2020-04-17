@@ -212,37 +212,7 @@ function moveEntity(e){
     }
 }
 
-function placePlayer() {
-    $.ajax({
-        url: "/create/" + [fakeEntity.type, fakeEntity.col, fakeEntity.row].join('/'),
-        type: "GET"}).done(function(data) {
-            fakeEntity.eid = data;
-            rects.push(fakeEntity);
-            fakeEntity = null;
-    });
-    gridOn = false;
-    canvas.onmousemove = moveEntity;
-    canvas.onmousedown = myDown;
-
-    draw();
-}
-
-function placeMonster() {
-    $.ajax({
-        url: "/create/" + [fakeEntity.type, fakeEntity.col, fakeEntity.row].join('/'),
-        type: "GET"}).done(function(data) {
-            fakeEntity.eid = data;
-            rects.push(fakeEntity);
-            fakeEntity = null;
-    });
-    gridOn = false;
-    canvas.onmousemove = moveEntity;
-    canvas.onmousedown = myDown;
-
-    draw();
-}
-
-function placeObstacle() {
+function placeEntity() {
     $.ajax({
         url: "/create/" + [fakeEntity.type, fakeEntity.col, fakeEntity.row].join('/'),
         type: "GET"}).done(function(data) {
@@ -287,39 +257,46 @@ function showFakeEntity(e) {
     // startY=my;
 }
 
-function addPlayer() {
+function addEntity(type, color) {
     // need to:
     // 1. replace the on click function to add player on click
-    var imgObj = new Image();
-    canvas.onmousedown = placePlayer;
-    imgObj.src = "https://dantheletsplayman.files.wordpress.com/2012/02/ash-red.png"
+    // var imgObj = new Image();
+    canvas.onmousedown = placeEntity;
+    // imgObj.src = "https://dantheletsplayman.files.wordpress.com/2012/02/ash-red.png"
     // 2. show the grid
     gridOn = true;
     // 3. show a transparent player show up on the grid
-    fakeEntity = {"col":null, "row":null, "size":1,"fill":"#444444", "type": "player", "icon": imgObj};
+    fakeEntity = {"col":null, "row":null, "size":1,"fill":color, "type": type};
     canvas.onmousemove = showFakeEntity;
 }
 
-function addMonster() {
-    // need to:
-    // 1. replace the on click function to add player on click
-    canvas.onmousedown = placeMonster;
-    // 2. show the grid
-    gridOn = true;
-    // 3. show a transparent monster show up on the grid
-    fakeEntity = {"col":null, "row":null, "size":1,"fill":"#FF5733", "type": "monster", "icon": null};
-    canvas.onmousemove = showFakeEntity;
+function animateMovement(entity, path) {
+    if (path.length == 0)
+        return
+
+    var position = path.pop();
+    entity.x = position[0]*TOKEN_SIZE;
+    entity.y = position[1]*TOKEN_SIZE;
+    draw();
+    setTimeout(animateMovement.bind(null, entity, path), 1000/4);
 }
 
-function addObstacle() {
-    // need to:
-    // 1. replace the on click function to add player on click
-    canvas.onmousedown = placeObstacle;
-    // 2. show the grid
-    gridOn = true;
-    // 3. show a transparent monster show up on the grid
-    fakeEntity = {"col":null, "row":null, "size":1,"fill":"#2A9700", "type": "monster", "icon": null};
-    canvas.onmousemove = showFakeEntity;
+function giveEntityTurn(entity) {
+    $.ajax({
+        url: "/pathfind/" + entity.eid,
+        type: "GET",
+        async: false}).done(function(data) {
+            animateMovement(entity, JSON.parse(data));
+    });
+}
+
+function turn() {
+    console.log("running turn");
+    for (var i=0;i<rects.length;i++) {
+        if (rects[i]['type'] == "monster") {
+            giveEntityTurn(rects[i]);
+        }
+    }
 }
 
 window.onload=function(){
@@ -350,19 +327,19 @@ window.onload=function(){
       <canvas id="canvas" width=500 height=500></canvas>
       <script src='/js/canvas.js'></script>
       <div align="center">
-        <a href="#" onclick="addPlayer()" class="btn btn-primary"><span class="fa fa-user"></span> Add Player </a>
-        <a href="javascript:addMonster()" class="btn btn-secondary"><span class="fa fa-flash"></span> Add Monster </a>
-        <a href="javascript:addObstacle()" class="btn btn-warning"><span class="fa fa-fire"></span> Add Obstacle </a>
+        <a href="#" onclick="addEntity('player', '#00ff00')" class="btn btn-primary"><span class="fa fa-user"></span> Add Player </a>
+        <a href="#" onclick="addEntity('monster', '#ff0000')" class="btn btn-secondary"><span class="fa fa-flash"></span> Add Monster </a>
+        <a href="#" onclick="addEntity('obstacle', '#ff9933')" class="btn btn-warning"><span class="fa fa-fire"></span> Add Obstacle </a>
         <a href="javascript:remove()" class="btn btn-danger"><span class="fa fa-remove"></span> Remove </a>
     </div>
     </div>
     <div class="col">
       <div class="sticky">
         <div class="btn-group-vertical">
-          <button type="button" onClick="Damage()" class="btn btn-danger">Damage</button>
-          <button type="button" onClick="Heal()" class="btn btn-success">Heal</button>
-          <button type="button" onClick="Stats()" class="btn btn-warning">Check Stats</button>
-          <button type="button" onClick="Turn()" class="btn btn-info">Start Monster Turn</button>
+          <button type="button" onClick="javascript:damage()" class="btn btn-danger">Damage</button>
+          <button type="button" onClick="javascript:heal()" class="btn btn-success">Heal</button>
+          <button type="button" onClick="javascript:stats()" class="btn btn-warning">Check Stats</button>
+          <button type="button" onClick="javascript:turn()" class="btn btn-info">Start Monster Turn</button>
         </div>
       </div>
     </div>
