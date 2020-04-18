@@ -58,7 +58,7 @@ class Monster:
         score = getattr(self, '_' + ability, 0)
         return random.randint(1, 21) + self.extractScore(score)
 
-    def __init__(self, level=None, size=None, health=None, name=None):
+    def __init__(self, level=None, size=None, health=None, name=None, speed=None):
 
         # Monster's name
         if name is None:
@@ -78,6 +78,12 @@ class Monster:
             self._size = self.MonsterSize(max(0, min(5, rVal)))
         else:
             self._size = getattr(self.MonsterSize, size)
+
+        if speed:
+            self._speed = speed
+        else:
+            self._speed = 20 + int(round(random.normal(2, 0.4, 1)[0])) * 5
+
             # distribution = {}
             # for size in rSize:
             #     result = Monster.MonsterSize(max(0, min(5, round(size))))

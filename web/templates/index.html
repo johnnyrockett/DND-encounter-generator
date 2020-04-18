@@ -396,7 +396,7 @@ function propagateStatCheck() {
         type: "GET"}).done(function(data) {
             if (data == "0")
                 data = "Invalid request. Options include: [attack, ac, damage, stats, athletics, etc.]"
-            else
+            else if (data.indexOf(eid) != -1)
                 data = data.substr(data.indexOf(eid) + eid.length+1);
             alert(data);
         },

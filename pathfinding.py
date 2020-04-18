@@ -101,6 +101,24 @@ class PathFinder:
         for child in self.getChildren(lowest):
             bisect.insort(self.openSet, child)
 
+    # Candidates is a list of dictionaries where each dictionary contains:
+    #   1. col
+    #   2. row
+    #   3. static weight
+    #   4. dynamic weight (based off of distance)
+    def navigateToOne(self, fromEntity, candidates):
+        for candidate in candidates:
+            # candidate['distance'] = abs(fromEntity['col']-candidate['col']) + abs(fromEntity['row']-candidate['row'])
+            candidate['path'] = self.navigate(candidate, fromEntity)
+            candidate['value'] = candidate['static'] + candidate['dynamic'] * len(candidate['path'])
+
+        candidates.sort(key=lambda candidate: candidate['value'], reverse=True)
+        # print(candidates)
+
+        # for candidate in candidates:
+        #     path = self.navigate(candidate, fromEntity)
+        return candidates[0]['path']
+
     def navigate(self, toEntity, fromEntity):
         # print("Finding: {col}, {row}".format(col=toEntity['col'] ,row=toEntity['row']))
         self.endP = self.G[toEntity['col']][toEntity['row']]

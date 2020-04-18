@@ -40,6 +40,7 @@ class CLI:
         self.cmdParser.add_argument('-l', '--level', type=int, required=False)
         self.cmdParser.add_argument('-s', '--size', required=False).completer = size_completer
         self.cmdParser.add_argument('-hp', '--health', type=int, required=False)
+        self.cmdParser.add_argument('-spd', '--speed', type=int, required=False)
         self.cmdParser.add_argument('-d', '--difficulty', required=False).completer = difficulty_completer
 
         completer = argcomplete.CompletionFinder(self.cmdParser)
@@ -60,18 +61,22 @@ class CLI:
             elif args.subargs[0] == 'monster':
                 if not self.state:
                     self.state = Encounter(populate=False)
-                self.state.addMonster(Monster(name=args.name, size=args.size, health=args.health, level=args.level if args.level else player_level))
+                self.state.addMonster(Monster(name=args.name, size=args.size, health=args.health, speed=args.speed, level=args.level if args.level else player_level))
+            return
         elif args.cmd == 'damage' and self.state and len(args.subargs) == 2:
             mon = self.state.getMonster(args.subargs[0])
             if mon and args.subargs[1].isdigit():
                 mon.damage(int(args.subargs[1]))
+            return
         elif args.cmd == 'heal' and self.state and len(args.subargs) == 2:
             mon = self.state.getMonster(args.subargs[0])
             if mon and args.subargs[1].isdigit():
                 mon.damage(-1*int(args.subargs[1]))
+            return
         elif args.cmd == 'remove' and self.state and len(args.subargs) == 1:
             self.state.removeMonster(args.subargs[0])
-        elif args.cmd == 'check' and self.state and len(args.subargs) == 2:
+            return
+        elif args.cmd == 'check' and self.state and len(args.subargs) ==2:
             mon = self.state.getMonster(args.subargs[0])
             if mon:
                 # "stats" print out all stored stats for mon
@@ -90,12 +95,15 @@ class CLI:
                 elif args.subargs[1] in skills:
                     a = Ability(skills[args.subargs[1]])
                     return mon._name + ' rolled a ' + str(mon.checkAbility(str.lower(a.name)))
+                elif args.subargs[1] in mon.__dict__:
+                    return str(getattr(mon, args.subargs[1]))
 
         elif args.cmd == 'help':
             cmdParser.print_help()
+            return
         elif args.cmd == 'quit':
             return 1
-        print("Not a valid command")
+        print(text + " is not a valid command")
         # else:
         #     cmdParser.error("I didn't understand that")
         return 0
