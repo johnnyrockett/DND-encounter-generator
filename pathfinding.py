@@ -108,16 +108,19 @@ class PathFinder:
     #   4. dynamic weight (based off of distance)
     def navigateToOne(self, fromEntity, candidates):
         for candidate in candidates:
-            # candidate['distance'] = abs(fromEntity['col']-candidate['col']) + abs(fromEntity['row']-candidate['row'])
+            candidate['distance'] = abs(fromEntity['col']-candidate['col']) + abs(fromEntity['row']-candidate['row'])
             candidate['path'] = self.navigate(candidate, fromEntity)
-            candidate['value'] = candidate['static'] + candidate['dynamic'] * len(candidate['path'])
+            dynamic = candidate['dynamic'] * (-1 * len(candidate['path']))
+            candidate['value'] = candidate['static'] + dynamic
+            # print(str(candidate['static']) +  ' + ' + str(dynamic) + ' = ' + str(candidate['value']))
 
         candidates.sort(key=lambda candidate: candidate['value'], reverse=True)
         # print(candidates)
 
         # for candidate in candidates:
         #     path = self.navigate(candidate, fromEntity)
-        return candidates[0]['path']
+        # print(candidates)
+        return (candidates[0]['path'], candidates[0]['value'])
 
     def navigate(self, toEntity, fromEntity):
         # print("Finding: {col}, {row}".format(col=toEntity['col'] ,row=toEntity['row']))

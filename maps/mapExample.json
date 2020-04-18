@@ -3,8 +3,5 @@
         {"col":4,"row":10,"size":1,"fill":"#00ff00", "type": "player", "health": 100},
         {"col":11,"row":10,"size":1,"fill":"#00ff00", "type": "player", "health": 100},
         {"col":7,"row":3,"size":1,"fill":"#ff0000", "type": "monster", "health": 100, "speed": 30}
-    ],
-    "expected": [
-        [11, 5]
     ]
 }

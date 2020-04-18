@@ -18,6 +18,11 @@ entities = None
 types = None
 expected = None
 
+MONSTER_HEALTH_WEIGHT = 1
+PATHING_DIFFICULTY_WEIGHT = 1
+THREAT_WEIGHT = 0.35
+PLAYER_HEALTH_WEIGHT = 1
+
 def resetDataStructures():
     global entities
     entities = {}
@@ -40,8 +45,11 @@ def init(mapJSON):
 
     resetDataStructures()
     for entity in state['entities']:
-        eid = uuid.uuid1().hex
-        entity['eid'] = eid
+        if 'eid' not in entity:
+            eid = uuid.uuid1().hex
+            entity['eid'] = eid
+        else:
+            eid = entity['eid']
         entities[eid] = entity
         types[entity['type']].append(entity)
         # Deal with entities with different sizes
@@ -70,21 +78,21 @@ def pathFind(eid):
 
         # Monster health
     averageHealth = 0
-    thisHealth = 0
+    thisHealth = 0.000000001
     for monster in types['monster']:
-        health = int(dnd_backend.query('check ' + eid + ' _current_health'))
+        health = int(dnd_backend.query('check ' + monster['eid'] + ' _current_health'))
         if monster['eid'] == eid:
             thisHealth += health
 
         averageHealth += health
     averageHealth /= len(types['monster'])
 
-    healthVal = thisHealth / averageHealth
+    healthVal = (averageHealth / thisHealth)*-1 + 1
 
         # Pathing difficulty
 
     speed = int(dnd_backend.query('check ' + eid + ' _speed'))
-    relativeSpeed = speed / 30
+    relativeSpeed = 30 / speed
 
         # Threat level
 
@@ -101,26 +109,32 @@ def pathFind(eid):
 
         averageHealth += health
 
-    avgPlayerHealth = thisHealth / len(types['player'])
+    avgPlayerHealth = averageHealth / len(types['player'])
 
     candidates = [{'col': p['col'], 'row': p['row'], 'eid': p['eid']} for p in types['player']]
 
     # Compute static & dynamic debates
     for candidate in candidates:
-        static = healthVal
-        candidate['static'] = static + (threat[candidate['eid']] if candidate['eid'] in threat else 0) + int(dnd_backend.query('check ' + candidate['eid'] + ' _current_health')) / avgPlayerHealth
-        dynamic = relativeSpeed
+        static = healthVal * MONSTER_HEALTH_WEIGHT
+        static += (threat[candidate['eid']] if candidate['eid'] in threat else 0) * THREAT_WEIGHT
+        static += (int(dnd_backend.query('check ' + candidate['eid'] + ' _current_health')) / avgPlayerHealth) * PLAYER_HEALTH_WEIGHT
+        candidate['static'] = static
+        dynamic = relativeSpeed * PATHING_DIFFICULTY_WEIGHT
         candidate['dynamic'] = dynamic
 
-    path = pathFinder.navigateToOne(entities[eid], candidates)
-    if not path:
+    path, score = pathFinder.navigateToOne(entities[eid], candidates)
+
+    if score < -25:
+        print("Monster tries to escape")
+        path = []
+    elif not path:
         path = [] # Really, this should do something smart
     else:
         steps = speed/5
         if steps < len(path):
             path = path[int(-1*steps):]
         updatePos(eid, path[0][0], path[0][1])
-    print(path[0])
+        # print(path[0])
     return json.dumps(path)
 
 @app.route('/create/<etype>/<col>/<row>')
@@ -161,7 +175,7 @@ def damage(srcid, destid, amt):
         entities[destid]['threat'] = {}
     if srcid not in entities[destid]['threat']:
         entities[destid]['threat'][srcid] = 0
-    entities[destid]['threat'][srcid] += amt
+    entities[destid]['threat'][srcid] += amt / int(dnd_backend.query('check {destid} _max_health'.format(destid=destid)))
     if rc == -1:
         return 'Something went wrong', 500
     else:
@@ -195,15 +209,21 @@ if __name__ == "__main__":
             for mapJSON in [f for f in os.listdir('maps') if os.path.isfile(os.path.join('maps', f)) and os.path.splitext(f)[1] == '.json']:
                 init(mapJSON)
                 if (not expected):
-                    print(mapJSON + ': no expectations listed. Skipping')
+                    print(mapJSON + ' SKIPPED: no expectations listed')
+                    pathFinder = PathFinder()
                     continue
                 locs = []
                 for mon in types['monster']:
-                    locs.append(json.loads(pathFind(mon['eid']))[0])
+                    path = json.loads(pathFind(mon['eid']))
+                    if len(path) == 0:
+                        locs.append([mon['col'], mon['row']])
+                    else:
+                        locs.append(path[0])
                 if locs != expected:
-                    print(mapJSON + ' FAILED: expecting: ' + str(expected) + ' but got ' + str(locs))
+                    print(mapJSON + ' FAILED: expecting ' + str(expected) + ' but got ' + str(locs))
                 else:
                     print(mapJSON + ' PASSED')
+                pathFinder = PathFinder()
             exit(0)
         else:
             init(args[0])
