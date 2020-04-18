@@ -124,7 +124,7 @@ def pathFind(eid):
 
     path, score = pathFinder.navigateToOne(entities[eid], candidates)
 
-    if score < -25:
+    if score < -25 and score != -9999: # -9999 reserved for no room next to players available
         print("Monster tries to escape")
         path = []
     elif not path:
@@ -140,7 +140,7 @@ def pathFind(eid):
 @app.route('/create/<etype>/<col>/<row>')
 def create(etype, col, row):
     eid = uuid.uuid1().hex
-    entity = {"col":int(col),"row":int(row),"size":1,"fill":"#444444", "type": etype, "eid": eid}
+    entity = {"col":int(col),"row":int(row),"size":1, "type": etype, "eid": eid}
     entities[eid] = entity
     types[entity['type']].append(entity)
     pathFinder.addEntityToG(entity)

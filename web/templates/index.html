@@ -21,6 +21,11 @@
 </style>
 
 <script>
+
+var PLAYER_COLOR = '#00ff00'
+var MONSTER_COLOR = '#ff0000'
+var OBSTACLE_COLOR = '#ff9933'
+
 var canvas=null;
 var ctx=null;
 var offsetX=null;
@@ -140,6 +145,12 @@ function pullGrid() {
                 rects[i].x = rects[i].col * TOKEN_SIZE;
                 rects[i].y = rects[i].row * TOKEN_SIZE;
                 rects[i].isDragging = false;
+                if (rects[i].type == 'player')
+                    rects[i].fill = PLAYER_COLOR;
+                else if (rects[i].type == 'monster')
+                    rects[i].fill = MONSTER_COLOR;
+                else if (rects[i].type == 'obstacle')
+                    rects[i].fill = OBSTACLE_COLOR;
             }
             // call to draw the scene
             draw();
@@ -172,8 +183,10 @@ function myDown(e){
 
     // test each rect to see if mouse is inside
     var r = rectHover(mx, my);
-    dragok=true;
-    r.isDragging=true;
+    if (r != undefined) {
+        dragok=true;
+        r.isDragging=true;
+    }
 
     // save the current mouse position
     startX=mx;
@@ -477,9 +490,9 @@ window.onload=function(){
       <canvas id="canvas" width=500 height=500></canvas>
       <script src='/js/canvas.js'></script>
       <div align="center">
-        <a href="#" onclick="addEntity('player', '#00ff00')" class="btn btn-primary"><span class="fa fa-user"></span> Add Player </a>
-        <a href="#" onclick="addEntity('monster', '#ff0000')" class="btn btn-secondary"><span class="fa fa-flash"></span> Add Monster </a>
-        <a href="#" onclick="addEntity('obstacle', '#ff9933')" class="btn btn-warning"><span class="fa fa-fire"></span> Add Obstacle </a>
+        <a href="#" onclick="addEntity('player', PLAYER_COLOR)" class="btn btn-primary"><span class="fa fa-user"></span> Add Player </a>
+        <a href="#" onclick="addEntity('monster', MONSTER_COLOR)" class="btn btn-secondary"><span class="fa fa-flash"></span> Add Monster </a>
+        <a href="#" onclick="addEntity('obstacle', OBSTACLE_COLOR)" class="btn btn-warning"><span class="fa fa-fire"></span> Add Obstacle </a>
         <a href="#" onclick="remove()" class="btn btn-danger"><span class="fa fa-remove"></span> Remove </a>
     </div>
     </div>

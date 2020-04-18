@@ -110,9 +110,12 @@ class PathFinder:
         for candidate in candidates:
             candidate['distance'] = abs(fromEntity['col']-candidate['col']) + abs(fromEntity['row']-candidate['row'])
             candidate['path'] = self.navigate(candidate, fromEntity)
-            dynamic = candidate['dynamic'] * (-1 * len(candidate['path']))
-            candidate['value'] = candidate['static'] + dynamic
-            # print(str(candidate['static']) +  ' + ' + str(dynamic) + ' = ' + str(candidate['value']))
+            if not candidate['path']:
+                candidate['value'] = -9999 # Anything is better than nothing
+            else:
+                dynamic = candidate['dynamic'] * (-1 * len(candidate['path']) if candidate['path'] else 0)
+                candidate['value'] = candidate['static'] + dynamic
+                # print(str(candidate['static']) +  ' + ' + str(dynamic) + ' = ' + str(candidate['value']))
 
         candidates.sort(key=lambda candidate: candidate['value'], reverse=True)
         # print(candidates)

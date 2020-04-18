@@ -1,9 +1,9 @@
 {
     "entities": [
-        {"col":1,"row":7,"size":1,"fill":"#00ff00", "type": "player", "health": 100},
-        {"col":9,"row":7,"size":1,"fill":"#00ff00", "type": "player", "health": 100},
-        {"col":7,"row":6,"size":1,"fill":"#ff0000", "type": "monster", "health": 1, "speed": 30},
-        {"col":7,"row":8,"size":1,"fill":"#ff0000", "type": "monster", "health": 100, "speed": 30}
+        {"col":1,"row":7,"size":1, "type": "player", "health": 100},
+        {"col":9,"row":7,"size":1, "type": "player", "health": 100},
+        {"col":7,"row":6,"size":1, "type": "monster", "health": 1, "speed": 30},
+        {"col":7,"row":8,"size":1, "type": "monster", "health": 100, "speed": 30}
     ],
     "expected": [
         [7, 6],
