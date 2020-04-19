@@ -1,7 +1,7 @@
 {
     "entities": [
-        {"col":1,"row":7,"size":1, "type": "player", "health": 100, "eid": "p1"},
-        {"col":9,"row":7,"size":1, "type": "player", "health": 5, "eid": "p2"},
+        {"col":1,"row":7,"size":1, "type": "player", "health": 100},
+        {"col":9,"row":7,"size":1, "type": "player", "health": 5},
         {"col":7,"row":7,"size":1, "type": "monster", "health": 100, "speed": 30}
     ],
     "expected": [
