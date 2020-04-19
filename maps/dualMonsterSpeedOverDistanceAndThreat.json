@@ -1,0 +1,16 @@
+{
+    "entities": [
+        {"col":2,"row":7,"size":1, "type": "player", "health": 100},
+        {"col":13,"row":7,"size":1, "type": "player", "health": 100, "eid": "p1"},
+        {"col":4,"row":6,"size":1, "type": "monster", "health": 100, "speed": 45, "threat": {
+            "p1": 20
+        }},
+        {"col":4,"row":8,"size":1, "type": "monster", "health": 100, "speed": 10, "threat": {
+            "p1": 20
+        }}
+    ],
+    "expected": [
+        [13, 6],
+        [3, 7]
+    ]
+}

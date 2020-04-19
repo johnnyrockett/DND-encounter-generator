@@ -28,7 +28,7 @@ This project is intended to virtualize encounters within DND. There are two part
 ```python
 monsterHealth = (averageHealth / thisHealth)*-1 + 1
 threat = damageDealt / maxHealth * 0.35
-playerHealth = currentHealth / avgPlayerHealth
+playerHealth =  avgPlayerHealth / currentHealth
 speed = 30 / monsterSpeed
 pathDifficulty = -1 * len(path)
 ```

@@ -445,7 +445,7 @@ function heal() {
 }
 
 function checkStat() {
-    selectors = [['monster']];
+    selectors = [['monster', 'player']];
     selectorIndex = 0;
     selectorFunction = propagateStatCheck;
     canvas.onmousedown = selectEntity;

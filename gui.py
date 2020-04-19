@@ -117,7 +117,7 @@ def pathFind(eid):
     for candidate in candidates:
         static = healthVal * MONSTER_HEALTH_WEIGHT
         static += (threat[candidate['eid']] if candidate['eid'] in threat else 0) * THREAT_WEIGHT
-        static += (int(dnd_backend.query('check ' + candidate['eid'] + ' _current_health')) / avgPlayerHealth) * PLAYER_HEALTH_WEIGHT
+        static += avgPlayerHealth / int(dnd_backend.query('check ' + candidate['eid'] + ' _current_health')) * PLAYER_HEALTH_WEIGHT
         candidate['static'] = static
         dynamic = relativeSpeed * PATHING_DIFFICULTY_WEIGHT
         candidate['dynamic'] = dynamic
