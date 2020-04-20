@@ -1,0 +1,15 @@
+{
+    "entities": [
+        {"col":2,"row":2,"size":1, "type": "player", "health": 100},
+        {"col":8,"row":8,"size":1, "type": "player", "health": 100, "eid": "p1"},
+        {"col":5,"row":5,"size":3, "type": "obstacle"},
+        {"col":9,"row":3,"size":1, "type": "obstacle"},
+        {"col":3,"row":9,"size":1, "type": "obstacle"},
+        {"col":4,"row":4,"size":1, "type": "monster", "health": 100, "speed": 50, "threat": {
+            "p1": 20
+        }}
+    ],
+    "expected": [
+        [8, 7]
+    ]
+}
